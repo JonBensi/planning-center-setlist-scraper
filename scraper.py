@@ -76,6 +76,18 @@ def get_service_plan_item_notes(service_id,plan_id,item_id, offset=0):
     return response.json()
 
 
+def get_service_plan_team_members(service_id,plan_id, offset=0):
+    url = f"{URL}/services/v2/service_types/{service_id}/plans/{plan_id}/team_members"
+    params={"offset":f"{offset}"}
+    response = requests.get(url=url, params=params, auth=(USERNAME,PASSWORD))
+    return response.json()
+
+def get_service_team(team_id):
+    url = f"{URL}/services/v2/teams/{team_id}"
+    response = requests.get(url=url, auth=(USERNAME,PASSWORD))
+    return response.json()
+
+
 def get_service_info(service_id):
     plans = get_service_plans(service_id)
     plan = plans.get("data")[0]
@@ -125,6 +137,10 @@ def get_service_info(service_id):
             "key": song_key.get("data",{}).get("attributes",{}).get("starting_key", 0),
         }
 
+    print(plan.get("attributes",{}).get("title"))
+    print(plan.get("attributes",{}).get("series_title"))
+    print(plan.get("attributes",{}).get("dates"))
+
     for song in songs_dict:
         print(song)
         bpm = songs_dict[song].get("bpm")
@@ -133,6 +149,32 @@ def get_service_info(service_id):
         print(f"\tMeter: {meter}")
         print(f"\tBPM: {bpm}")
         print(f"\tKey: {key}")
+
+    team_members_response = get_service_plan_team_members(service_id,plan_id)
+    # print(team_members_response)
+    team_members = team_members_response.get("data",[])
+
+    team_info = {}
+
+    for team_member in team_members:
+        name = team_member.get("attributes").get("name")
+        team_position_name = team_member.get("attributes").get("team_position_name")
+        team_id = team_member.get("relationships").get('team').get("data").get("id")
+        if team_id not in team_info.keys():
+            team_info_response = get_service_team(team_id)
+            team_info[team_info_response.get("data",{}).get("id")]={"name":team_info_response.get("data",{}).get("attributes",{}).get("name"),"members":[]}
+        team_info[team_id]["members"].append({"position": team_position_name, "name": name})
+
+    print("Teams")
+
+    for team in team_info:
+        team_name = team_info.get(team).get("name")
+        print(team_name)
+        members = team_info.get(team).get("members")
+        for member in members:
+            team_position_name = member.get("position")
+            name = member.get("name")
+            print(f"\t{team_position_name}: {name}")
 
 if __name__ == "__main__":
     args = get_args()
