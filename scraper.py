@@ -112,7 +112,7 @@ def get_service_info(service_id):
     songs_dict = OrderedDict()
 
     for song in songs:
-        print(song.get("attributes", {}).get("title"))
+        # print(song.get("attributes", {}).get("title"))
         item_id = song.get("id")
         song_title = song.get("attributes", {}).get("title")
         song_info = get_service_plan_item_song(service_id,plan_id,item_id)
@@ -127,7 +127,12 @@ def get_service_info(service_id):
 
     for song in songs_dict:
         print(song)
-        print(songs_dict[song])
+        bpm = songs_dict[song].get("bpm")
+        meter = songs_dict[song].get("meter")
+        key = songs_dict[song].get("key")
+        print(f"\tMeter: {meter}")
+        print(f"\tBPM: {bpm}")
+        print(f"\tKey: {key}")
 
 if __name__ == "__main__":
     args = get_args()
