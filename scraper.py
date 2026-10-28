@@ -179,10 +179,11 @@ def get_service_info(service_id):
         name = team_member.get("attributes").get("name")
         team_position_name = team_member.get("attributes").get("team_position_name")
         team_id = team_member.get("relationships").get('team').get("data").get("id")
+        status = team_member.get("attributes",{}).get("status","D")
         if team_id not in team_info.keys():
             team_info_response = get_service_team(team_id)
             team_info[team_info_response.get("data",{}).get("id")]={"name":team_info_response.get("data",{}).get("attributes",{}).get("name"),"members":[]}
-        team_info[team_id]["members"].append({"position": team_position_name, "name": name})
+        team_info[team_id]["members"].append({"position": team_position_name, "name": name, "status": status})
 
     print("Teams")
 
@@ -193,7 +194,15 @@ def get_service_info(service_id):
         for member in members:
             team_position_name = member.get("position")
             name = member.get("name")
-            print(f"\t{team_position_name}: {name}")
+            status = member.get("status")
+            if status == "D":
+                name = "\u0336".join(name) + "\u0336"
+                print(f"\t{team_position_name}: {name}")
+            elif status == "U":
+                print(f"\t{team_position_name}: {name} (???)")
+            else:
+                print(f"\t{team_position_name}: {name}")
+
 
 if __name__ == "__main__":
     args = get_args()
