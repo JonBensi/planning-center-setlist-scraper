@@ -150,9 +150,28 @@ def get_service_info(service_id):
         print(f"\tBPM: {bpm}")
         print(f"\tKey: {key}")
 
-    team_members_response = get_service_plan_team_members(service_id,plan_id)
-    # print(team_members_response)
-    team_members = team_members_response.get("data",[])
+
+
+    more = True
+
+    offset = 0
+    team_members = []
+
+    while more:
+
+        team_members_response = get_service_plan_team_members(service_id,plan_id, offset=offset)
+        # print(items_response)
+        team_members.extend(team_members_response.get("data",[]))
+
+        meta = team_members_response.get("meta")
+        # print(meta)
+        offset = meta.get("next", {}).get("offset", 0)
+        count = meta.get("count", 0)
+        total_count = meta.get("total_count", {})
+        # print(offset)
+        # print(count)
+        # print(total_count)
+        more = meta.get("next", None) is not None
 
     team_info = {}
 
